@@ -16,7 +16,10 @@ import yaml
 
 args = docopt.docopt(__doc__)
 
-f = open(args['<METADATA_FILE>'], 'r')
+metadata_filename = args['<METADATA_FILE>']
+srcdir = os.path.dirname(metadata_filename)
+
+f = open(metadata_filename, 'r')
 data = yaml.load(f)
 
 copies = []
@@ -34,7 +37,8 @@ except FileExistsError:
     pass
 
 for (old, new) in copies:
-    new = f'{args["--output"]}/{new}'
-    print(f'{old} -> {new}')
+    source = os.path.join(srcdir, old)
+    dest = os.path.join(args['--output'], new)
 
-    shutil.copyfile(old, new)
+    print(f'{source} -> {dest}')
+    shutil.copyfile(source, dest)
