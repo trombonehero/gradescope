@@ -1,0 +1,9 @@
+= Gradescope scripts
+
+This repository contains tools that may be helpful for interacting with
+https://gradescope.com[Gradescope].
+Currently, this includes:
+
+`gsrename`::
+  a script for renaming submission bundles (the zip file that Gradescope emits
+  when you click "Download Submissions" from an assignment)
