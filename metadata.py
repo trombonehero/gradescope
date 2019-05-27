@@ -28,13 +28,10 @@ def load_metadata(filename):
     """
 
     if zipfile.is_zipfile(filename):
-        meta_file, file_opener, dirname = load_from_zip(filename)
+        meta_file, get_file = load_from_zip(filename)
 
     else:
-        meta_file, file_opener, dirname = load_from_file(filename)
-
-    def get_file(name):
-        return file_opener(os.path.join(dirname, name), 'rb')
+        meta_file, get_file = load_from_file(filename)
 
     return (yaml.safe_load(meta_file), get_file)
 
@@ -69,7 +66,10 @@ def load_from_zip(filename):
     if not meta:
         raise ValueError(f'No submission metadata in {filename}')
 
-    return (meta, z.open, dirname)
+    def get_file(name):
+        return z.open(os.path.join(dirname, name), 'r')
+
+    return (meta, get_file)
 
 
 def load_from_file(filename):
@@ -84,4 +84,7 @@ def load_from_file(filename):
     meta = open(filename, 'r')
     dirname = os.path.dirname(filename)
 
-    return (meta, open, dirname)
+    def get_file(name):
+        return open(os.path.join(dirname, name), 'rb')
+
+    return (meta, get_file)
