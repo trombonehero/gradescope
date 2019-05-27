@@ -3,24 +3,21 @@
 '''gsrename: rename Gradescope submissions
 
 Usage:
-    gsrename [options] <METADATA_FILE>
+    gsrename [options] <file>
 
 Options:
+    <FILE>                      downloaded zip file or metadata YAML file
     -o <dir>, --output <dir>    output directory [default: .]
 '''
 
 import docopt
+import metadata
 import os
 import shutil
-import yaml
+
 
 args = docopt.docopt(__doc__)
-
-metadata_filename = args['<METADATA_FILE>']
-srcdir = os.path.dirname(metadata_filename)
-
-f = open(metadata_filename, 'r')
-data = yaml.load(f)
+data, get_file = metadata.load_metadata(args['<file>'])
 
 copies = []
 
@@ -28,17 +25,17 @@ for (filename, metadata) in data.items():
     extension = os.path.splitext(filename)[-1]
 
     for s in metadata[':submitters']:
-        new_name = f'{s[":sid"]} - {s[":name"]}.{extension}'
+        new_name = f'{s[":sid"]} - {s[":name"]}{extension}'
         copies.append((filename, new_name))
 
+# Create output directory
 try:
     os.mkdir(args['--output'])
 except FileExistsError:
     pass
 
-for (old, new) in copies:
-    source = os.path.join(srcdir, old)
-    dest = os.path.join(args['--output'], new)
+for (source, dest) in copies:
+    dest = os.path.join(args['--output'], dest)
 
     print(f'{source} -> {dest}')
-    shutil.copyfile(source, dest)
+    shutil.copyfileobj(get_file(source), open(dest, 'wb'))
